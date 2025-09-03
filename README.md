@@ -26,7 +26,7 @@ Integridad (detección de manipulación) y autenticidad del servidor (pinning de
 
 
 ## 🔑 Criptografía usada (y por qué)
-1) TLS (transporte)
+#### 1) TLS (transporte)
 
 Qué es: protocolo híbrido estándar. Durante el handshake se negocia una clave simétrica efímera y, desde ahí, todo va cifrado y autenticado.
 
@@ -42,7 +42,7 @@ Mínimo TLS 1.2 (ideal 1.3 por defecto en Python moderno).
 
 Resultado: ngrok no puede leer el contenido; solo reenvía TCP.
 
-2) E2EE (aplicación) cliente ↔ cliente
+#### 2) E2EE (aplicación) cliente ↔ cliente
 
 Intercambio de claves: X25519 (ECDH) → ambas partes calculan el mismo secreto compartido.
 
@@ -56,7 +56,7 @@ Propiedad clave: solo el verdadero destinatario (con su privada X25519) puede de
 
 💡 Recomendación: comparar huellas (fingerprints) de las claves públicas por un canal alterno (voz/WhatsApp) para detectar suplantación.
 
-📨 Protocolo de mensajes (JSON por líneas)
+## 📨 Protocolo de mensajes (JSON por líneas)
 
 Los mensajes son objetos JSON terminados en \n (framing por líneas). Campos binarios (claves públicas, nonce, cipher) van en Base64.
 
@@ -89,7 +89,7 @@ Cliente A → Servidor:
 Servidor → Cliente B: reenvía tal cual.
 
 ## 🧠 Flujo detallado
-a) Arranque del servidor
+#### a) Arranque del servidor
 
 Crea contexto TLS (SSLContext(PROTOCOL_TLS_SERVER)).
 
@@ -99,7 +99,7 @@ bind(0.0.0.0:5000), listen() y acepta conexiones.
 
 Por cada conexión: wrap_socket(..., server_side=True) → TLS activo.
 
-b) Conexión del cliente
+#### b) Conexión del cliente
 
 Crea contexto TLS de cliente y pinning con server.crt.
 
@@ -109,7 +109,7 @@ Envía hello con su clave pública X25519.
 
 Recibe welcome/users con el directorio de claves.
 
-c) Mensaje E2EE (cliente ↔ cliente)
+#### c) Mensaje E2EE (cliente ↔ cliente)
 
 A elige a B y toma su pub_B del directorio.
 
