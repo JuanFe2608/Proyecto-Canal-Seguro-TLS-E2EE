@@ -1,11 +1,11 @@
-🔐 Chat Seguro con TLS + E2EE sobre ngrok
-🎯 Resumen en
+# 🔐 Chat Seguro con TLS + E2EE sobre ngrok
+## 🎯 Resumen 
 
 Transporte cifrado (TLS): todo lo que va entre cliente ↔ servidor viaja dentro de un túnel TLS; ngrok y la red solo ven bytes opacos.
 
 Capa de aplicación cifrada (E2EE): los mensajes cliente ↔ cliente van además cifrados con X25519 + HKDF + AES-GCM; el servidor no puede leerlos (solo los reenvía).
 
-Comandos:
+## Comandos:
 /list usuarios, /fp <user> huella, /to <user> <texto> E2EE, /server <texto> hablar con el servidor.
 
 🏗️ Arquitectura (capas y roles)
@@ -16,7 +16,7 @@ Comandos:
 - E2EE (aplicación): Mensajes A↔B cifrados extremo a extremo. Servidor reenvía sin leer.
 - Mensajes al servidor (/server ...): el servidor sí los ve (tras descifrar TLS).
 
-Objetivos de seguridad
+##Objetivos de seguridad
 
 Confidencialidad en tránsito frente a ISP, campus WiFi, ngrok, etc. (gracias a TLS).
 
@@ -24,9 +24,8 @@ Confidencialidad extremo a extremo entre clientes (gracias a E2EE).
 
 Integridad (detección de manipulación) y autenticidad del servidor (pinning de server.crt).
 
-Opcional: autenticidad del cliente (mTLS) y verificación de huellas entre clientes (anti-MITM).
 
-🔑 Criptografía usada (y por qué)
+## 🔑 Criptografía usada (y por qué)
 1) TLS (transporte)
 
 Qué es: protocolo híbrido estándar. Durante el handshake se negocia una clave simétrica efímera y, desde ahí, todo va cifrado y autenticado.
@@ -83,13 +82,13 @@ Servidor → Cliente: {"type":"server","text":"echo: hola server"}
 relay (E2EE A → B, el servidor NO lee)
 Cliente A → Servidor:
 
-{"type":"relay","to":"bob","from":"alice","alg":"X25519+AESGCM",
+{"type":"relay","to":"Juan","from":"Felipe","alg":"X25519+AESGCM",
  "nonce":"<b64>", "cipher":"<b64>"}
 
 
 Servidor → Cliente B: reenvía tal cual.
 
-🧠 Flujo detallado
+## 🧠 Flujo detallado
 a) Arranque del servidor
 
 Crea contexto TLS (SSLContext(PROTOCOL_TLS_SERVER)).
@@ -122,12 +121,12 @@ Manda relay al servidor; el servidor solo reenvía.
 
 B, al recibir, calcula key = HKDF( X25519(sk_B, pub_A) ) y descifra.
 
-🧪 Cómo ejecutar (local y remoto)
-1) Requisitos
+## 🧪 Cómo ejecutar (local y remoto)
+### 1) Requisitos
 python --version   # >= 3.9
 pip install cryptography
 
-2) Generar certificado del servidor (demo)
+### 2) Generar certificado del servidor (demo)
 openssl req -x509 -newkey rsa:2048 \
   -keyout server.key -out server.crt \
   -days 365 -nodes -subj "/CN=servidor-local"
@@ -137,7 +136,7 @@ Comparte server.crt con todos los clientes.
 
 Nunca compartas server.key.
 
-3) Prueba local (sin ngrok)
+### 3) Prueba local (sin ngrok)
 
 Terminal A (servidor):
 
@@ -146,10 +145,10 @@ python server_tls_chat.py
 
 Terminal B y C (clientes):
 
-python client_tls_e2ee.py Alice 127.0.0.1 5000
-python client_tls_e2ee.py Bob   127.0.0.1 5000
+python client_tls_e2ee.py Juan 127.0.0.1 5000
+python client_tls_e2ee.py Felipe  127.0.0.1 5000
 
-4) Prueba remota (con ngrok TCP)
+### 4) Prueba remota (con ngrok TCP)
 
 En el servidor:
 
@@ -158,24 +157,25 @@ ngrok tcp 5000
 # ejemplo: Forwarding  tcp://0.tcp.ngrok.io:14309 -> localhost:5000
 
 
-Comparte a tus amigos: host 0.tcp.ngrok.io, puerto 14309 y el server.crt.
+### Compartir con otros amigos(Otros Clientes): host 0.tcp.ngrok.io, puerto 14309 y el server.crt.
 
 En los clientes remotos:
 
 python client_tls_e2ee.py Amigo 0.tcp.ngrok.io 14309
 
-🕹️ Uso desde el cliente
+## 🕹️ Uso desde el cliente
 /list                      # ver usuarios y claves públicas
 /fp <user>                 # ver huella de la clave pública de <user>
 /to <user> <texto>         # enviar mensaje E2EE a <user>
 /server <texto>            # hablar con el servidor (el server sí lo ve)
 
-🔍 ¿Cómo sé que de verdad va cifrado?
-Con Wireshark (nivel red)
+### 🔍 ¿Cómo sé que de verdad va cifrado?
+
+#### Con Wireshark (nivel red)
 
 Filtro: tcp.port == <puerto_ngrok>
 
-Verás TLSv1.3 Application Data (o TLS 1.2), nunca texto en claro.
+Se vera TLSv1.3 Application Data (o TLS 1.2), nunca texto en claro.
 
 “Follow TCP stream” mostrará bytes aleatorios/hex.
 
@@ -191,7 +191,7 @@ Solo el destinatario podrá descifrar y leer el texto del otro.
 
 Si la clave/nonce no coinciden, falla con aviso (integridad de GCM).
 
-🧯 Troubleshooting rápido
+## 🧯 Troubleshooting rápido
 
 CERTIFICATE_VERIFY_FAILED → el cliente no tiene el server.crt correcto o en esa ruta.
 
