@@ -16,7 +16,7 @@ Capa de aplicación cifrada (E2EE): los mensajes cliente ↔ cliente van además
 - E2EE (aplicación): Mensajes A↔B cifrados extremo a extremo. Servidor reenvía sin leer.
 - Mensajes al servidor (/server ...): el servidor sí los ve (tras descifrar TLS).
 
-##Objetivos de seguridad
+## Objetivos de seguridad
 
 Confidencialidad en tránsito frente a ISP, campus WiFi, ngrok, etc. (gracias a TLS).
 
